@@ -1,4 +1,4 @@
-// sw.js - Service Worker Thread
+
 const files = new Map();
 const defaultMimes = { 'js': 'text/javascript', 'css': 'text/css', 'html': 'text/html' };
 

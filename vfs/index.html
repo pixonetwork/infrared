@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Infrared GitHack VFS Engine</title>
+
+    <link rel="stylesheet" href="live-theme.css">
+</head>
+<body style="background: #0f172a; color: #38bdf8; font-family: monospace; padding: 20px;">
+
+    <h2>Infrared Native Network Pipeline</h2>
+    <div id="status" style="background: #020617; border: 1px solid #334155; padding: 15px; height: 120px; color: #f1f5f9; line-height: 1.6;">
+        > Initializing same-origin network worker...
+    </div>
+
+    <script src="live-alert.js"></script>
+
+    <script>
+        async function bootEngine() {
+            const display = document.getElementById('status');
+
+            try {
+                // Since index.html and sw.js live in the same repo, we can use a relative path!
+                // This completely bypasses the Same-Origin Policy check in Firefox.
+                const registration = await navigator.serviceWorker.register('./sw.js', { scope: './' });
+                display.innerHTML += "<br>> Service worker registered successfully.";
+
+                // Wait until the Service Worker has complete control of the page
+                if (!navigator.serviceWorker.controller) {
+                    display.innerHTML += "<br>> Activating worker routing link... (Please refresh if stuck)";
+                    await new Promise(r => navigator.serviceWorker.addEventListener('controllerchange', r, { once: true }));
+                }
+                display.innerHTML += "<br>> Link secured. Writing virtual assets to thread...";
+
+                // 3. Write your assets directly into the active worker's virtual RAM
+                const encoder = new TextEncoder();
+                
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'VFS_WRITE',
+                    filename: 'live-theme.css',
+                    content: encoder.encode(`body { background: #011627 !important; color: #82aaff !important; }`)
+                });
+
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'VFS_WRITE',
+                    filename: 'live-alert.js',
+                    content: encoder.encode(`
+                        console.log("SUCCESS: Native script tag caught by Service Worker intercept loop!");
+                        document.getElementById('status').innerHTML += "<br>> Virtual script execution confirmed.";
+                    `)
+                });
+
+                // Give the worker a tiny fraction of a second to map the files
+                await new Promise(r => setTimeout(r, 100));
+
+                display.innerHTML += "<br>> Matrix deployment complete.";
+
+            } catch (err) {
+                display.innerHTML += `<br>><span style="color: #ef4444;"> Error: ${err.message}</span>`;
+                console.error(err);
+            }
+        }
+
+        bootEngine();
+    </script>
+</body>
+</html>
